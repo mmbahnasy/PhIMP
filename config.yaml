@@ -1,0 +1,14 @@
+nidr:
+  client_id: "mock_client_id_8492"
+  client_secret: "mock_secret_key_xyz"
+  auth_url: "https://auth.ismpcanada.ca/oauth/token"
+  api_url: "https://api.ismpcanada.ca/nidr/v1/incidents"
+  pharmacy_repository_id: "PH-98214"
+  use_mock_nidr: true
+
+security:
+  users:
+    - username: "pharmacist"
+      password: "Pharm@2026"
+      full_name: "J. Doe, Pharmacist"
+      practice_id: "PH-8492"

@@ -1,0 +1,115 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Safety Self-Assessment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root {
+        --canada-red: #c8102e;
+        --canada-red-deep: #8f0b21;
+        --canada-red-soft: #fbe7eb;
+        --canada-white: #ffffff;
+        --canada-ink: #1f2937;
+        --canada-border: #f5c8d0;
+      }
+      body {
+        background: linear-gradient(180deg, #ffffff 0%, #fff2f3 100%);
+        color: var(--canada-ink);
+      }
+      .canada-red { background-color: var(--canada-red); }
+      .canada-btn { background-color: var(--canada-red); color: white; }
+      .canada-btn:hover { background-color: var(--canada-red-deep); }
+      .maple-icon { width: 30px; height: 30px; object-fit: contain; }
+    </style>
+</head>
+<body class="bg-white text-slate-800 font-sans">
+    <div class="min-h-screen flex flex-col">
+        <header class="canada-red text-white shadow-md border-b-4 border-red-100">
+            <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <img src="{{ url_for('static', filename='images/Maple_Leaf.png') }}" alt="Maple Leaf" class="maple-icon rounded-md bg-white/10 p-1">
+                    <h1 class="text-xl font-semibold">Medication Safety Self-Assessment (SSA)</h1>
+                </div>
+                <a href="/" class="text-sm bg-white text-red-700 hover:bg-red-50 px-3 py-1.5 rounded transition font-medium">Back to dashboard</a>
+            </div>
+        </header>
+
+        <main class="flex-grow max-w-5xl w-full mx-auto px-4 py-8">
+            <div class="bg-white rounded-xl shadow-sm border p-8 mb-8">
+                <h2 class="text-xl font-bold mb-4">Safety Self-Assessment Review</h2>
+                <form method="POST" action="/ssa" class="space-y-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Assessment Date</label>
+                            <input type="date" name="assessment_date" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Overall Score</label>
+                            <select name="overall_score" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required>
+                                <option value="1">1 / 5</option>
+                                <option value="2">2 / 5</option>
+                                <option value="3">3 / 5</option>
+                                <option value="4">4 / 5</option>
+                                <option value="5">5 / 5</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Risk Rating</label>
+                            <select name="risk_rating" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required>
+                                <option value="Low">Low</option>
+                                <option value="Moderate">Moderate</option>
+                                <option value="High">High</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Status</label>
+                            <select name="status" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required>
+                                <option value="Satisfactory">Satisfactory</option>
+                                <option value="Needs Improvement">Needs Improvement</option>
+                                <option value="Action Required">Action Required</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Improvement Plan</label>
+                        <textarea name="improvement_plan" rows="4" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required></textarea>
+                    </div>
+                    <button type="submit" class="bg-red-700 hover:bg-red-900 text-white font-medium px-5 py-2.5 rounded-lg text-sm transition">Save SSA Record</button>
+                </form>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+                <div class="px-6 py-4 border-b font-bold text-slate-800">Historical SSA Records</div>
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="bg-slate-50 border-b">
+                            <th class="px-6 py-3">Date</th>
+                            <th class="px-6 py-3">Score</th>
+                            <th class="px-6 py-3">Risk</th>
+                            <th class="px-6 py-3">Status</th>
+                            <th class="px-6 py-3">Improvement Plan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in ssa_results_db %}
+                        <tr class="border-b hover:bg-slate-50">
+                            <td class="px-6 py-4 text-slate-600">{{ item.assessment_date }}</td>
+                            <td class="px-6 py-4 font-medium">{{ item.overall_score }} / 5</td>
+                            <td class="px-6 py-4 text-slate-600">{{ item.risk_rating }}</td>
+                            <td class="px-6 py-4 text-slate-600">{{ item.status }}</td>
+                            <td class="px-6 py-4 text-slate-600">{{ item.improvement_plan }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="5" class="px-6 py-8 text-center text-slate-400">No SSA records saved yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+

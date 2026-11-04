@@ -1,0 +1,13 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[codz]
+*$py.class
+
+# PDF files
+*.pdf
+
+# Ignore the incidents_store directory
+incidents_store/
+
+# Ignore generated NDIR sync log files
+nidr_sync_log.json

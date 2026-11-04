@@ -1,0 +1,66 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CQI Action Plans</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root {
+        --canada-red: #c8102e;
+        --canada-red-deep: #8f0b21;
+        --canada-red-soft: #fbe7eb;
+        --canada-white: #ffffff;
+        --canada-ink: #1f2937;
+        --canada-border: #f5c8d0;
+      }
+      body {
+        background: linear-gradient(180deg, #ffffff 0%, #fff2f3 100%);
+        color: var(--canada-ink);
+      }
+      .canada-red { background-color: var(--canada-red); }
+      .canada-btn { background-color: var(--canada-red); color: white; }
+      .canada-btn:hover { background-color: var(--canada-red-deep); }
+      .maple-icon { width: 30px; height: 30px; object-fit: contain; }
+    </style>
+</head>
+<body class="bg-white text-slate-800 font-sans">
+    <div class="min-h-screen flex flex-col">
+        <header class="canada-red text-white shadow-md border-b-4 border-red-100">
+            <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <img src="{{ url_for('static', filename='images/Maple_Leaf.png') }}" alt="Maple Leaf" class="maple-icon rounded-md bg-white/10 p-1">
+                    <h1 class="text-xl font-semibold">Continuous Quality Improvement (CQI) Action Plans</h1>
+                </div>
+                <a href="/" class="text-sm bg-white text-red-700 hover:bg-red-50 px-3 py-1.5 rounded transition font-medium">â† Back</a>
+            </div>
+        </header>
+        <main class="flex-grow max-w-5xl w-full mx-auto px-4 py-8">
+            <div class="bg-white rounded-xl shadow-sm border p-8 mb-8">
+                <h2 class="text-xl font-bold mb-4">Create Action Plan</h2>
+                <form method="POST" action="/action-plans" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" name="issue" placeholder="Identified Issue / Trend" class="border p-2.5 rounded-lg text-sm" required>
+                        <input type="date" name="target_date" class="border p-2.5 rounded-lg text-sm" required>
+                    </div>
+                    <textarea name="steps" rows="3" placeholder="Preventive Action Steps..." class="border p-2.5 rounded-lg text-sm w-full" required></textarea>
+                    <button type="submit" class="bg-red-700 hover:bg-red-900 text-white px-5 py-2.5 rounded-lg text-sm">Save Plan</button>
+                </form>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+                <div class="px-6 py-4 border-b font-bold">Active Plans</div>
+                <table class="w-full text-left text-sm">
+                    <thead><tr class="bg-slate-50 border-b"><th class="px-6 py-3">Issue</th><th class="px-6 py-3">Action Steps</th><th class="px-6 py-3">Target Date</th></tr></thead>
+                    <tbody>
+                        {% for ap in action_plans_db %}
+                        <tr class="border-b hover:bg-slate-50"><td class="px-6 py-4 font-medium">{{ ap.issue }}</td><td class="px-6 py-4 text-slate-600">{{ ap.steps }}</td><td class="px-6 py-4 text-slate-600">{{ ap.target_date }}</td></tr>
+                        {% else %}
+                        <tr><td colspan="3" class="px-6 py-8 text-center text-slate-400">No action plans recorded.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+

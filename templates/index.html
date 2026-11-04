@@ -1,0 +1,156 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>OCP AIMS Compliance Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root {
+        --canada-red: #c8102e;
+        --canada-red-deep: #8f0b21;
+        --canada-red-soft: #fbe7eb;
+        --canada-white: #ffffff;
+        --canada-ink: #1f2937;
+        --canada-border: #f5c8d0;
+      }
+      body {
+        background: linear-gradient(180deg, #ffffff 0%, #fff2f3 100%);
+        color: var(--canada-ink);
+      }
+      .canada-red { background-color: var(--canada-red); }
+      .canada-btn { background-color: var(--canada-red); color: white; }
+      .canada-btn:hover { background-color: var(--canada-red-deep); }
+      .canada-card { background: white; border: 1px solid var(--canada-border); box-shadow: 0 10px 25px rgba(200, 16, 46, 0.08); }
+      .canada-pill { background: var(--canada-red-soft); color: var(--canada-red-deep); border: 1px solid #f7d5dc; }
+      .maple-icon { width: 32px; height: 32px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15)); }
+      .canada-border { border-color: var(--canada-border); }
+      .canada-text { color: var(--canada-red-deep); }
+      .canada-muted { color: var(--canada-red-deep); }
+    </style>
+</head>
+<body class="bg-white text-slate-800 font-sans antialiased">
+    <div class="min-h-screen flex flex-col">
+        <header class="canada-red text-white shadow-md border-b-4 border-red-100">
+            <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <img src="{{ url_for('static', filename='images/Maple_Leaf.png') }}" alt="Maple Leaf" class="maple-icon rounded-md bg-white/10 p-1">
+                    <span class="bg-white text-red-700 text-xs font-bold px-2.5 py-1 rounded">OCP AIMS 2027</span>
+                    <h1 class="text-xl font-semibold">Medication Incident Management & CQI Platform</h1>
+                </div>
+                <div class="text-sm text-red-100">
+                    Active User: <span class="font-medium text-white">{{ current_user.full_name if current_user else 'Unknown' }}</span> | Practice ID: {{ current_user.practice_id if current_user else 'PH-00000' }}
+                    <a href="/logout" class="ml-3 text-red-100 hover:text-white underline">Log out</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-8">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="mb-6 p-4 rounded-lg {% if category == 'success' %}bg-emerald-50 text-emerald-800 border border-emerald-200{% else %}bg-red-50 text-red-700 border border-blue-200{% endif %}">
+                      {{ message }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wider">Total Stored Incidents</h3>
+                    <p class="text-3xl font-bold text-slate-900 mt-2">{{ incidents|length }}</p>
+                    <span class="text-xs text-emerald-600 font-medium mt-1 block">✓ Individual JSON Files</span>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wider">Active CQI Action Plans</h3>
+                    <p class="text-3xl font-bold text-slate-900 mt-2">{{ action_plans_db|length }}</p>
+                    <span class="text-xs text-red-700 font-medium mt-1 block">Quarterly Review Active</span>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wider">NIDR OAuth Token</h3>
+                    <p class="text-3xl font-bold text-emerald-600 mt-2">Active</p>
+                    <span class="text-xs text-slate-500 mt-1 block">****** Cached</span>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wider">Automated Sync Schedule</h3>
+                    <p class="text-3xl font-bold text-red-700 mt-2">03:00 AM</p>
+                    <span class="text-xs text-slate-500 mt-1 block">Daily upload active</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-red-300 transition">
+                    <h2 class="text-lg font-bold text-slate-900 mb-2">1. Document Incident / Near Miss</h2>
+                    <p class="text-sm text-slate-600 mb-4">Record events capturing mandatory OCP criteria fields.</p>
+                    <a href="/report" class="inline-block bg-red-700 hover:bg-red-900 text-white font-medium px-4 py-2 rounded-lg text-sm transition">New Incident Form</a>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-red-300 transition">
+                    <h2 class="text-lg font-bold text-slate-900 mb-2">2. CQI Action Plans</h2>
+                    <p class="text-sm text-slate-600 mb-4">Document pharmacy action plans and workflow preventive measures.</p>
+                    <a href="/action-plans" class="inline-block bg-red-700 hover:bg-red-900 text-white font-medium px-4 py-2 rounded-lg text-sm transition">Manage Action Plans</a>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-red-300 transition">
+                    <h2 class="text-lg font-bold text-slate-900 mb-2">3. SSA Tool</h2>
+                    <p class="text-sm text-slate-600 mb-4">Complete the pharmacy safety self-assessment and document follow-up actions.</p>
+                    <a href="/ssa" class="inline-block bg-red-700 hover:bg-red-900 text-white font-medium px-4 py-2 rounded-lg text-sm transition">Open SSA Tool</a>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-red-300 transition">
+                    <h2 class="text-lg font-bold text-slate-900 mb-2">4. NIDR Portal & REST API Sync</h2>
+                    <p class="text-sm text-slate-600 mb-4">Monitor OAuth connection, anonymization pipeline, and transmission logs.</p>
+                    <a href="/nidr-status" class="inline-block bg-red-700 hover:bg-red-900 text-white font-medium px-4 py-2 rounded-lg text-sm transition">View NIDR Sync Hub</a>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+                    <h3 class="font-bold text-slate-800">Stored Incident JSON Records (Folder: <code>{{ incidents_dir }}/</code>)</h3>
+                    <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded font-medium">Internal CQI Storage</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-600 text-xs font-semibold uppercase tracking-wider border-b border-slate-200">
+                                <th class="px-6 py-3">File ID / Type</th>
+                                <th class="px-6 py-3">Date & Time</th>
+                                <th class="px-6 py-3">Age Range</th>
+                                <th class="px-6 py-3">Route</th>
+                                <th class="px-6 py-3">Associated Factors</th>
+                                <th class="px-6 py-3">Harm Level</th>
+                                <th class="px-6 py-3">NIDR Sync Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 text-sm">
+                            {% if incidents %}
+                                {% for inc in incidents %}
+                                <tr class="hover:bg-slate-50">
+                                    <td class="px-6 py-4 font-medium text-red-700">
+                                        #{{ inc.id }} <span class="text-xs uppercase px-2 py-0.5 rounded font-bold {% if inc.event_type == 'Incident' %}bg-rose-100 text-rose-800{% else %}bg-amber-100 text-amber-800{% endif %}">{{ inc.event_type }}</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-slate-600">{{ inc.date }} {{ inc.time }}</td>
+                                    <td class="px-6 py-4 text-slate-600">{{ inc.age_range }}</td>
+                                    <td class="px-6 py-4 text-slate-600">{{ inc.route }}</td>
+                                    <td class="px-6 py-4 text-slate-600">{{ inc.associated_factors or 'None' }}</td>
+                                    <td class="px-6 py-4 text-slate-600">{{ inc.harm_level if inc.event_type == 'Incident' else 'N/A' }}</td>
+                                    <td class="px-6 py-4">
+                                        {% if inc.synced_to_nidr %}
+                                            <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-1 rounded font-semibold">Synced</span>
+                                        {% else %}
+                                            <span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded font-semibold">Pending Next Sync</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="7" class="px-6 py-8 text-center text-slate-400">No incident records found.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+
