@@ -6,40 +6,39 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       :root {
-        --canada-red: #c8102e;
-        --canada-red-deep: #8f0b21;
-        --canada-red-soft: #fbe7eb;
-        --canada-white: #ffffff;
-        --canada-ink: #1f2937;
-        --canada-border: #f5c8d0;
+        --theme-primary: #4b8f63;
+        --theme-primary-deep: #2f6f49;
+        --theme-primary-soft: #e9f4ec;
+        --theme-white: #ffffff;
+        --theme-ink: #24352a;
+        --theme-border: #cfe2d3;
       }
       body {
-        background: linear-gradient(180deg, #ffffff 0%, #fff2f3 100%);
-        color: var(--canada-ink);
+        background: linear-gradient(180deg, #ffffff 0%, #f1f8f2 100%);
+        color: var(--theme-ink);
       }
-      .canada-red { background-color: var(--canada-red); }
-      .canada-btn { background-color: var(--canada-red); color: white; }
-      .canada-btn:hover { background-color: var(--canada-red-deep); }
-      .canada-card { background: white; border: 1px solid var(--canada-border); box-shadow: 0 10px 25px rgba(200, 16, 46, 0.08); }
-      .canada-pill { background: var(--canada-red-soft); color: var(--canada-red-deep); border: 1px solid #f7d5dc; }
+      .theme-primary { background-color: var(--theme-primary); }
+      .theme-btn { background-color: var(--theme-primary); color: white; }
+      .theme-btn:hover { background-color: var(--theme-primary-deep); }
+      .theme-card { background: white; border: 1px solid var(--theme-border); box-shadow: 0 10px 25px rgba(75, 143, 99, 0.08); }
+      .theme-pill { background: var(--theme-primary-soft); color: var(--theme-primary-deep); border: 1px solid #d6e9da; }
       .maple-icon { width: 32px; height: 32px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15)); }
-      .canada-border { border-color: var(--canada-border); }
-      .canada-text { color: var(--canada-red-deep); }
-      .canada-muted { color: var(--canada-red-deep); }
+      .theme-border { border-color: var(--theme-border); }
+      .theme-text { color: var(--theme-primary-deep); }
+      .theme-muted { color: var(--theme-primary-deep); }
     </style>
 </head>
-<body class="bg-white text-slate-800 font-sans antialiased">
+<body class="bg-green-50 text-slate-800 font-sans antialiased">
     <div class="min-h-screen flex flex-col">
-        <header class="canada-red text-white shadow-md border-b-4 border-red-100">
+        <header class="theme-primary text-white shadow-md border-b-4 border-green-100">
             <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
                 <div class="flex items-center space-x-3">
                     <img src="{{ url_for('static', filename='images/Maple_Leaf.png') }}" alt="Maple Leaf" class="maple-icon rounded-md bg-white/10 p-1">
-                    <span class="bg-white text-red-700 text-xs font-bold px-2.5 py-1 rounded">OCP AIMS 2027</span>
-                    <h1 class="text-xl font-semibold">Medication Incident Management & CQI Platform</h1>
+                    <span class="bg-white text-green-700 text-xs font-bold px-2.5 py-1 rounded">OCP AIMS 2027</span>
+                    <h1 class="text-xl font-semibold">Pharmacy Incident Management & CQI Platform</h1>
                 </div>
-                <div class="text-sm text-red-100">
+                <div class="text-sm text-green-100">
                     Active User: <span class="font-medium text-white">{{ current_user.full_name if current_user else 'Unknown' }}</span> | Practice ID: {{ current_user.practice_id if current_user else 'PH-00000' }}
-                    <a href="/logout" class="ml-3 text-red-100 hover:text-white underline">Log out</a>
                 </div>
             </div>
         </header>
@@ -64,7 +63,7 @@
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wider">Active CQI Action Plans</h3>
                     <p class="text-3xl font-bold text-slate-900 mt-2">{{ action_plans_db|length }}</p>
-                    <span class="text-xs text-red-700 font-medium mt-1 block">Quarterly Review Active</span>
+                    <span class="text-xs text-green-700 font-medium mt-1 block">Quarterly Review Active</span>
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wider">NIDR OAuth Token</h3>
@@ -73,31 +72,31 @@
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wider">Automated Sync Schedule</h3>
-                    <p class="text-3xl font-bold text-red-700 mt-2">03:00 AM</p>
+                    <p class="text-3xl font-bold text-green-700 mt-2">03:00 AM</p>
                     <span class="text-xs text-slate-500 mt-1 block">Daily upload active</span>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-red-300 transition">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-green-300 transition">
                     <h2 class="text-lg font-bold text-slate-900 mb-2">1. Document Incident / Near Miss</h2>
                     <p class="text-sm text-slate-600 mb-4">Record events capturing mandatory OCP criteria fields.</p>
-                    <a href="/report" class="inline-block bg-red-700 hover:bg-red-900 text-white font-medium px-4 py-2 rounded-lg text-sm transition">New Incident Form</a>
+                    <a href="/report" class="inline-block bg-green-700 hover:bg-green-900 text-white font-medium px-4 py-2 rounded-lg text-sm transition">New Incident Form</a>
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-red-300 transition">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-green-300 transition">
                     <h2 class="text-lg font-bold text-slate-900 mb-2">2. CQI Action Plans</h2>
                     <p class="text-sm text-slate-600 mb-4">Document pharmacy action plans and workflow preventive measures.</p>
-                    <a href="/action-plans" class="inline-block bg-red-700 hover:bg-red-900 text-white font-medium px-4 py-2 rounded-lg text-sm transition">Manage Action Plans</a>
+                    <a href="/action-plans" class="inline-block bg-green-700 hover:bg-green-900 text-white font-medium px-4 py-2 rounded-lg text-sm transition">Manage Action Plans</a>
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-red-300 transition">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-green-300 transition">
                     <h2 class="text-lg font-bold text-slate-900 mb-2">3. SSA Tool</h2>
                     <p class="text-sm text-slate-600 mb-4">Complete the pharmacy safety self-assessment and document follow-up actions.</p>
-                    <a href="/ssa" class="inline-block bg-red-700 hover:bg-red-900 text-white font-medium px-4 py-2 rounded-lg text-sm transition">Open SSA Tool</a>
+                    <a href="/ssa" class="inline-block bg-green-700 hover:bg-green-900 text-white font-medium px-4 py-2 rounded-lg text-sm transition">Open SSA Tool</a>
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-red-300 transition">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-green-300 transition">
                     <h2 class="text-lg font-bold text-slate-900 mb-2">4. NIDR Portal & REST API Sync</h2>
                     <p class="text-sm text-slate-600 mb-4">Monitor OAuth connection, anonymization pipeline, and transmission logs.</p>
-                    <a href="/nidr-status" class="inline-block bg-red-700 hover:bg-red-900 text-white font-medium px-4 py-2 rounded-lg text-sm transition">View NIDR Sync Hub</a>
+                    <a href="/nidr-status" class="inline-block bg-green-700 hover:bg-green-900 text-white font-medium px-4 py-2 rounded-lg text-sm transition">View NIDR Sync Hub</a>
                 </div>
             </div>
 
@@ -117,13 +116,14 @@
                                 <th class="px-6 py-3">Associated Factors</th>
                                 <th class="px-6 py-3">Harm Level</th>
                                 <th class="px-6 py-3">NIDR Sync Status</th>
+                                <th class="px-6 py-3">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-200 text-sm">
                             {% if incidents %}
                                 {% for inc in incidents %}
                                 <tr class="hover:bg-slate-50">
-                                    <td class="px-6 py-4 font-medium text-red-700">
+                                    <td class="px-6 py-4 font-medium text-green-700">
                                         #{{ inc.id }} <span class="text-xs uppercase px-2 py-0.5 rounded font-bold {% if inc.event_type == 'Incident' %}bg-rose-100 text-rose-800{% else %}bg-amber-100 text-amber-800{% endif %}">{{ inc.event_type }}</span>
                                     </td>
                                     <td class="px-6 py-4 text-slate-600">{{ inc.date }} {{ inc.time }}</td>
@@ -138,11 +138,15 @@
                                             <span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded font-semibold">Pending Next Sync</span>
                                         {% endif %}
                                     </td>
+                                    <td class="px-6 py-4">
+                                        <a href="{{ url_for('edit_incident', incident_id=inc.id) }}" class="text-green-700 hover:text-green-900 underline">Edit</a>
+                                        <a href="{{ url_for('print_incident', incident_id=inc.id) }}" target="_blank" rel="noopener" class="ml-3 inline-block rounded bg-green-700 px-3 py-1 text-white hover:bg-green-900">Print</a>
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             {% else %}
                                 <tr>
-                                    <td colspan="7" class="px-6 py-8 text-center text-slate-400">No incident records found.</td>
+                                    <td colspan="8" class="px-6 py-8 text-center text-slate-400">No incident records found.</td>
                                 </tr>
                             {% endif %}
                         </tbody>

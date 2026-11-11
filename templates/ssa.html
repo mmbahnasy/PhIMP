@@ -6,32 +6,32 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       :root {
-        --canada-red: #c8102e;
-        --canada-red-deep: #8f0b21;
-        --canada-red-soft: #fbe7eb;
-        --canada-white: #ffffff;
-        --canada-ink: #1f2937;
-        --canada-border: #f5c8d0;
+        --theme-primary: #4b8f63;
+        --theme-primary-deep: #2f6f49;
+        --theme-primary-soft: #e9f4ec;
+        --theme-white: #ffffff;
+        --theme-ink: #24352a;
+        --theme-border: #cfe2d3;
       }
       body {
-        background: linear-gradient(180deg, #ffffff 0%, #fff2f3 100%);
-        color: var(--canada-ink);
+        background: linear-gradient(180deg, #ffffff 0%, #f1f8f2 100%);
+        color: var(--theme-ink);
       }
-      .canada-red { background-color: var(--canada-red); }
-      .canada-btn { background-color: var(--canada-red); color: white; }
-      .canada-btn:hover { background-color: var(--canada-red-deep); }
+      .theme-primary { background-color: var(--theme-primary); }
+      .theme-btn { background-color: var(--theme-primary); color: white; }
+      .theme-btn:hover { background-color: var(--theme-primary-deep); }
       .maple-icon { width: 30px; height: 30px; object-fit: contain; }
     </style>
 </head>
-<body class="bg-white text-slate-800 font-sans">
+<body class="bg-green-50 text-slate-800 font-sans">
     <div class="min-h-screen flex flex-col">
-        <header class="canada-red text-white shadow-md border-b-4 border-red-100">
+        <header class="theme-primary text-white shadow-md border-b-4 border-green-100">
             <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
                 <div class="flex items-center gap-3">
                     <img src="{{ url_for('static', filename='images/Maple_Leaf.png') }}" alt="Maple Leaf" class="maple-icon rounded-md bg-white/10 p-1">
                     <h1 class="text-xl font-semibold">Medication Safety Self-Assessment (SSA)</h1>
                 </div>
-                <a href="/" class="text-sm bg-white text-red-700 hover:bg-red-50 px-3 py-1.5 rounded transition font-medium">Back to dashboard</a>
+                <a href="/" class="text-sm bg-white text-green-700 hover:bg-green-50 px-3 py-1.5 rounded transition font-medium">Back to dashboard</a>
             </div>
         </header>
 
@@ -77,7 +77,7 @@
                         <label class="block text-sm font-medium text-slate-700 mb-1">Improvement Plan</label>
                         <textarea name="improvement_plan" rows="4" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required></textarea>
                     </div>
-                    <button type="submit" class="bg-red-700 hover:bg-red-900 text-white font-medium px-5 py-2.5 rounded-lg text-sm transition">Save SSA Record</button>
+                    <button type="submit" class="bg-green-700 hover:bg-green-900 text-white font-medium px-5 py-2.5 rounded-lg text-sm transition">Save SSA Record</button>
                 </form>
             </div>
 

@@ -6,29 +6,29 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       :root {
-        --canada-red: #c8102e;
-        --canada-red-deep: #8f0b21;
-        --canada-red-soft: #fbe7eb;
-        --canada-white: #ffffff;
-        --canada-ink: #1f2937;
-        --canada-border: #f5c8d0;
+        --theme-primary: #4b8f63;
+        --theme-primary-deep: #2f6f49;
+        --theme-primary-soft: #e9f4ec;
+        --theme-white: #ffffff;
+        --theme-ink: #24352a;
+        --theme-border: #cfe2d3;
       }
       body {
-        background: linear-gradient(180deg, #fff 0%, #fff2f3 100%);
-        color: var(--canada-ink);
+        background: linear-gradient(180deg, #ffffff 0%, #f1f8f2 100%);
+        color: var(--theme-ink);
       }
-      .canada-red { background-color: var(--canada-red); }
-      .canada-btn { background-color: var(--canada-red); color: white; }
-      .canada-btn:hover { background-color: var(--canada-red-deep); }
+      .theme-primary { background-color: var(--theme-primary); }
+      .theme-btn { background-color: var(--theme-primary); color: white; }
+      .theme-btn:hover { background-color: var(--theme-primary-deep); }
       .maple-icon { width: 32px; height: 32px; object-fit: contain; }
     </style>
 </head>
-<body class="bg-white text-slate-800 min-h-screen flex items-center justify-center">
-    <div class="w-full max-w-md bg-white rounded-xl shadow-lg border border-red-100 p-8">
+<body class="bg-green-50 text-slate-800 min-h-screen flex items-center justify-center">
+    <div class="w-full max-w-md bg-white rounded-xl shadow-lg border border-green-100 p-8">
         <div class="mb-6 text-center">
             <div class="flex items-center justify-center gap-2 mb-3">
                 <img src="{{ url_for('static', filename='images/Maple_Leaf.png') }}" alt="Maple Leaf" class="maple-icon">
-                <div class="inline-flex rounded-full bg-red-100 text-red-700 px-3 py-1 text-xs font-semibold uppercase tracking-wide">OCP AIMS</div>
+                <div class="inline-flex rounded-full bg-green-100 text-green-700 px-3 py-1 text-xs font-semibold uppercase tracking-wide">OCP AIMS</div>
             </div>
             <h1 class="text-2xl font-bold text-slate-900">Pharmacy Staff Sign In</h1>
             <p class="text-sm text-slate-500 mt-2">Use your primary practice credentials to access the incident management platform.</p>
@@ -51,7 +51,7 @@
                 <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
                 <input type="password" name="password" value="Pharm@2026" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required>
             </div>
-            <button type="submit" class="w-full bg-red-700 hover:bg-red-900 text-white font-medium px-4 py-3 rounded-lg text-sm transition">Sign In</button>
+            <button type="submit" class="w-full bg-green-700 hover:bg-green-900 text-white font-medium px-4 py-3 rounded-lg text-sm transition">Sign In</button>
         </form>
     </div>
 </body>

@@ -10,5 +10,5 @@ security:
   users:
     - username: "pharmacist"
       password: "Pharm@2026"
-      full_name: "J. Doe, Pharmacist"
+      full_name: "Laila Salem, Pharmacist"
       practice_id: "PH-8492"

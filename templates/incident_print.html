@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Incident Report - {{ incident.id }}</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 2rem;
+        background: #f0fdf4;
+        color: #1f2937;
+        font-family: Arial, sans-serif;
+      }
+      .report {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: #fff;
+        border: 1px solid #d1d5db;
+      }
+      header {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #166534;
+      }
+      h1 {
+        margin: 0 0 0.5rem;
+        color: #166534;
+      }
+      .metadata {
+        margin: 0;
+        color: #4b5563;
+      }
+      dl {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+        margin: 0;
+      }
+      .detail {
+        overflow-wrap: anywhere;
+      }
+      .detail.wide {
+        grid-column: 1 / -1;
+      }
+      dt {
+        margin-bottom: 0.25rem;
+        color: #4b5563;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+      dd {
+        margin: 0;
+        white-space: pre-wrap;
+      }
+      .screen-only {
+        max-width: 800px;
+        margin: 1rem auto 0;
+        text-align: right;
+      }
+      button {
+        padding: 0.65rem 1rem;
+        border: 0;
+        border-radius: 0.4rem;
+        background: #166534;
+        color: #fff;
+        cursor: pointer;
+        font-size: 1rem;
+      }
+      @media print {
+        @page {
+          margin: 1.5cm;
+        }
+        body {
+          padding: 0;
+          background: #fff;
+        }
+        .report {
+          max-width: none;
+          padding: 0;
+          border: 0;
+        }
+        .screen-only {
+          display: none;
+        }
+      }
+    </style>
+</head>
+<body>
+    <main class="report">
+        <header>
+            <h1>Incident Report</h1>
+            <p class="metadata">Record #{{ incident.id }} · {{ incident.event_type or "Incident" }}</p>
+        </header>
+        <dl>
+            <div class="detail"><dt>Date</dt><dd>{{ incident.date or "Not provided" }}</dd></div>
+            <div class="detail"><dt>Time</dt><dd>{{ incident.time or "Not provided" }}</dd></div>
+            <div class="detail"><dt>Incident type</dt><dd>{{ incident.incident_type or "Not provided" }}</dd></div>
+            <div class="detail"><dt>Harm level</dt><dd>{{ incident.harm_level if incident.event_type == "Incident" else "N/A" }}</dd></div>
+            <div class="detail"><dt>Patient age range</dt><dd>{{ incident.age_range or "Not provided" }}</dd></div>
+            <div class="detail"><dt>Patient gender</dt><dd>{{ incident.patient_gender or "Not provided" }}</dd></div>
+            <div class="detail"><dt>Discovered by</dt><dd>{{ incident.discovered_by or "Not provided" }}</dd></div>
+            <div class="detail"><dt>Prescribed by</dt><dd>{{ incident.prescribed_by or "Not provided" }}</dd></div>
+            <div class="detail"><dt>Medication(s) involved</dt><dd>{{ incident.medications_involved or "Not provided" }}</dd></div>
+            <div class="detail"><dt>Route</dt><dd>{{ incident.route or "Not provided" }}</dd></div>
+            <div class="detail wide"><dt>Medication system stage(s)</dt><dd>{{ incident.medication_system_stages or "Not provided" }}</dd></div>
+            <div class="detail wide"><dt>Associated factors</dt><dd>{{ incident.associated_factors or "Not provided" }}</dd></div>
+            <div class="detail wide"><dt>Incident description</dt><dd>{{ incident.incident_description or "Not provided" }}</dd></div>
+            <div class="detail wide"><dt>Contributing factors</dt><dd>{{ incident.contributing_factors or "Not provided" }}</dd></div>
+            <div class="detail wide"><dt>Actions taken</dt><dd>{{ incident.actions_taken or "Not provided" }}</dd></div>
+        </dl>
+    </main>
+    <div class="screen-only">
+        <button type="button" onclick="window.print()">Print report</button>
+    </div>
+    <script>
+      window.addEventListener("load", () => window.print());
+    </script>
+</body>
+</html>

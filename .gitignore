@@ -11,3 +11,10 @@ incidents_store/
 
 # Ignore generated NDIR sync log files
 nidr_sync_log.json
+
+# Ignore locally stored CQI action plans
+action_plans/
+
+# Ignore large documentation files
+doc\PhIMP.pdf
+doc\PhIMP.odp

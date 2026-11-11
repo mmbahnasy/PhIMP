@@ -6,65 +6,71 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       :root {
-        --canada-red: #c8102e;
-        --canada-red-deep: #8f0b21;
-        --canada-red-soft: #fbe7eb;
-        --canada-white: #ffffff;
-        --canada-ink: #1f2937;
-        --canada-border: #f5c8d0;
+        --theme-primary: #4b8f63;
+        --theme-primary-deep: #2f6f49;
+        --theme-primary-soft: #e9f4ec;
+        --theme-white: #ffffff;
+        --theme-ink: #24352a;
+        --theme-border: #cfe2d3;
       }
       body {
-        background: linear-gradient(180deg, #ffffff 0%, #fff2f3 100%);
-        color: var(--canada-ink);
+        background: linear-gradient(180deg, #ffffff 0%, #f1f8f2 100%);
+        color: var(--theme-ink);
       }
-      .canada-red { background-color: var(--canada-red); }
-      .canada-btn { background-color: var(--canada-red); color: white; }
-      .canada-btn:hover { background-color: var(--canada-red-deep); }
-      .canada-card { background: white; border: 1px solid var(--canada-border); box-shadow: 0 10px 25px rgba(200, 16, 46, 0.08); }
-      .canada-pill { background: var(--canada-red-soft); color: var(--canada-red-deep); border: 1px solid #f7d5dc; }
+      .theme-primary { background-color: var(--theme-primary); }
+      .theme-btn { background-color: var(--theme-primary); color: white; }
+      .theme-btn:hover { background-color: var(--theme-primary-deep); }
+      .theme-card { background: white; border: 1px solid var(--theme-border); box-shadow: 0 10px 25px rgba(75, 143, 99, 0.08); }
+      .theme-pill { background: var(--theme-primary-soft); color: var(--theme-primary-deep); border: 1px solid #d6e9da; }
       .maple-icon { width: 32px; height: 32px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15)); }
-      .canada-border { border-color: var(--canada-border); }
-      .canada-text { color: var(--canada-red-deep); }
+      .theme-border { border-color: var(--theme-border); }
+      .theme-text { color: var(--theme-primary-deep); }
     </style>
 </head>
-<body class="bg-white text-slate-800 font-sans">
+<body class="bg-green-50 text-slate-800 font-sans">
     <div class="min-h-screen flex flex-col">
-        <header class="canada-red text-white shadow-md border-b-4 border-red-100">
+        <header class="theme-primary text-white shadow-md border-b-4 border-green-100">
             <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
                 <div class="flex items-center gap-3">
                     <img src="{{ url_for('static', filename='images/Maple_Leaf.png') }}" alt="Maple Leaf" class="maple-icon rounded-md bg-white/10 p-1">
-                    <h1 class="text-xl font-semibold">OCP AIMS Incident Management Portal</h1>
+                    <h1 class="text-xl font-semibold">OCP AIMS Pharmacy Incident Management Portal</h1>
                 </div>
                 <div class="flex items-center gap-3">
-                    <span class="text-sm text-red-100">{{ current_user.full_name if current_user else 'User' }}</span>
-                    <a href="/logout" class="text-sm bg-white text-red-700 hover:bg-red-50 px-3 py-1.5 rounded transition font-medium">Log out</a>
+                    <span class="text-sm text-green-100">{{ current_user.full_name if current_user else 'User' }}</span>
                 </div>
             </div>
         </header>
 
         <main class="flex-grow max-w-5xl w-full mx-auto px-4 py-8">
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
-                <h2 class="text-2xl font-bold text-slate-900 mb-2">Medication Incident & Near Miss Report</h2>
+                <h2 class="text-2xl font-bold text-slate-900 mb-2">{% if is_edit %}Edit Incident Record{% else %}Medication Incident & Near Miss Report{% endif %}</h2>
                 <p class="text-sm text-slate-600 mb-6">This form captures the mandatory OCP and ISMP data fields for ongoing CQI and anonymized NIDR submission.</p>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                  {% for category, message in messages %}
+                    <div class="mb-6 p-4 rounded-lg {% if category == 'success' %}bg-emerald-50 text-emerald-800 border border-emerald-200{% else %}bg-red-50 text-red-700 border border-red-200{% endif %}">
+                        {{ message }}
+                    </div>
+                  {% endfor %}
+                {% endwith %}
 
-                <form method="POST" action="/report" class="space-y-6">
+                <form method="POST" action="{% if is_edit %}{{ url_for('edit_incident', incident_id=incident.id) }}{% else %}{{ url_for('report') }}{% endif %}" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Event Type *</label>
                             <select name="event_type" id="event_type" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required onchange="toggleHarm()">
-                                <option value="Incident">Medication Incident (Reached Patient)</option>
-                                <option value="Near Miss">Near Miss (Intercepted)</option>
+                                <option value="Incident" {% if incident.event_type == 'Incident' or not incident.event_type %}selected{% endif %}>Medication Incident (Reached Patient)</option>
+                                <option value="Near Miss" {% if incident.event_type == 'Near Miss' %}selected{% endif %}>Near Miss (Intercepted)</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Type of Incident *</label>
                             <select name="incident_type" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required>
-                                <option value="Incorrect drug">Incorrect drug</option>
-                                <option value="Incorrect patient">Incorrect patient</option>
-                                <option value="Incorrect dose">Incorrect dose</option>
-                                <option value="Incorrect route">Incorrect route</option>
-                                <option value="Incorrect frequency">Incorrect frequency</option>
-                                <option value="Medication omission">Medication omission</option>
+                                <option value="Incorrect drug" {% if incident.incident_type == 'Incorrect drug' or not incident.incident_type %}selected{% endif %}>Incorrect drug</option>
+                                <option value="Incorrect patient" {% if incident.incident_type == 'Incorrect patient' %}selected{% endif %}>Incorrect patient</option>
+                                <option value="Incorrect dose" {% if incident.incident_type == 'Incorrect dose' %}selected{% endif %}>Incorrect dose</option>
+                                <option value="Incorrect route" {% if incident.incident_type == 'Incorrect route' %}selected{% endif %}>Incorrect route</option>
+                                <option value="Incorrect frequency" {% if incident.incident_type == 'Incorrect frequency' %}selected{% endif %}>Incorrect frequency</option>
+                                <option value="Medication omission" {% if incident.incident_type == 'Medication omission' %}selected{% endif %}>Medication omission</option>
                             </select>
                         </div>
                     </div>
@@ -72,11 +78,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Date Incident Occurred *</label>
-                            <input type="date" name="date" value="{{ today }}" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required>
+                            <input type="date" name="date" value="{{ incident.date or today }}" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Time Incident Occurred *</label>
-                            <input type="time" name="time" value="14:30" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required>
+                            <input type="time" name="time" value="{{ incident.time or '14:30' }}" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required>
                         </div>
                     </div>
 
@@ -84,34 +90,34 @@
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Patient Age Range *</label>
                             <select name="age_range" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required>
-                                <option value="0-9 years">0-9 years</option>
-                                <option value="10-19 years">10-19 years</option>
-                                <option value="20-29 years">20-29 years</option>
-                                <option value="30-39 years">30-39 years</option>
-                                <option value="40-49 years" selected>40-49 years</option>
-                                <option value="50-59 years">50-59 years</option>
-                                <option value="60-69 years">60-69 years</option>
-                                <option value="70-79 years">70-79 years</option>
-                                <option value="80+ years">80+ years</option>
+                                <option value="0-9 years" {% if incident.age_range == '0-9 years' %}selected{% endif %}>0-9 years</option>
+                                <option value="10-19 years" {% if incident.age_range == '10-19 years' %}selected{% endif %}>10-19 years</option>
+                                <option value="20-29 years" {% if incident.age_range == '20-29 years' %}selected{% endif %}>20-29 years</option>
+                                <option value="30-39 years" {% if incident.age_range == '30-39 years' %}selected{% endif %}>30-39 years</option>
+                                <option value="40-49 years" {% if incident.age_range == '40-49 years' or not incident.age_range %}selected{% endif %}>40-49 years</option>
+                                <option value="50-59 years" {% if incident.age_range == '50-59 years' %}selected{% endif %}>50-59 years</option>
+                                <option value="60-69 years" {% if incident.age_range == '60-69 years' %}selected{% endif %}>60-69 years</option>
+                                <option value="70-79 years" {% if incident.age_range == '70-79 years' %}selected{% endif %}>70-79 years</option>
+                                <option value="80+ years" {% if incident.age_range == '80+ years' %}selected{% endif %}>80+ years</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Patient Gender *</label>
                             <select name="patient_gender" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required>
-                                <option value="Female">Female</option>
-                                <option value="Male">Male</option>
-                                <option value="Non-binary">Non-binary</option>
-                                <option value="Unknown">Unknown</option>
+                                <option value="Female" {% if incident.patient_gender == 'Female' or not incident.patient_gender %}selected{% endif %}>Female</option>
+                                <option value="Male" {% if incident.patient_gender == 'Male' %}selected{% endif %}>Male</option>
+                                <option value="Non-binary" {% if incident.patient_gender == 'Non-binary' %}selected{% endif %}>Non-binary</option>
+                                <option value="Unknown" {% if incident.patient_gender == 'Unknown' %}selected{% endif %}>Unknown</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Incident Discovered By *</label>
                             <select name="discovered_by" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required>
-                                <option value="Pharmacist">Pharmacist</option>
-                                <option value="Technician">Technician</option>
-                                <option value="Patient">Patient</option>
-                                <option value="Caregiver">Caregiver</option>
-                                <option value="Other">Other</option>
+                                <option value="Pharmacist" {% if incident.discovered_by == 'Pharmacist' or not incident.discovered_by %}selected{% endif %}>Pharmacist</option>
+                                <option value="Technician" {% if incident.discovered_by == 'Technician' %}selected{% endif %}>Technician</option>
+                                <option value="Patient" {% if incident.discovered_by == 'Patient' %}selected{% endif %}>Patient</option>
+                                <option value="Caregiver" {% if incident.discovered_by == 'Caregiver' %}selected{% endif %}>Caregiver</option>
+                                <option value="Other" {% if incident.discovered_by == 'Other' %}selected{% endif %}>Other</option>
                             </select>
                         </div>
                     </div>
@@ -120,29 +126,29 @@
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Medication Prescribed By *</label>
                             <select name="prescribed_by" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required>
-                                <option value="Physician">Physician</option>
-                                <option value="Pharmacist">Pharmacist</option>
-                                <option value="Other prescriber">Other prescriber</option>
-                                <option value="Patient self-managed">Patient self-managed</option>
+                                <option value="Physician" {% if incident.prescribed_by == 'Physician' or not incident.prescribed_by %}selected{% endif %}>Physician</option>
+                                <option value="Pharmacist" {% if incident.prescribed_by == 'Pharmacist' %}selected{% endif %}>Pharmacist</option>
+                                <option value="Other prescriber" {% if incident.prescribed_by == 'Other prescriber' %}selected{% endif %}>Other prescriber</option>
+                                <option value="Patient self-managed" {% if incident.prescribed_by == 'Patient self-managed' %}selected{% endif %}>Patient self-managed</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Medication(s) Involved *</label>
-                            <input type="text" name="medications_involved" placeholder="e.g., Amoxicillin 500mg" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required>
+                            <input type="text" name="medications_involved" value="{{ incident.medications_involved or '' }}" placeholder="e.g., Amoxicillin 500mg" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required>
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-2">Medication System Stage(s) Involved *</label>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                            <label><input type="checkbox" name="medication_system_stages" value="Prescribing"> Prescribing</label>
-                            <label><input type="checkbox" name="medication_system_stages" value="Order entry"> Order entry</label>
-                            <label><input type="checkbox" name="medication_system_stages" value="Verification"> Verification</label>
-                            <label><input type="checkbox" name="medication_system_stages" value="Dispensing"> Dispensing</label>
-                            <label><input type="checkbox" name="medication_system_stages" value="Administration"> Administration</label>
-                            <label><input type="checkbox" name="medication_system_stages" value="Monitoring"> Monitoring</label>
-                            <label><input type="checkbox" name="medication_system_stages" value="Documentation"> Documentation</label>
-                            <label><input type="checkbox" name="medication_system_stages" value="Transition of care"> Transition of care</label>
+                            <label><input type="checkbox" name="medication_system_stages" value="Prescribing" {% if 'Prescribing' in selected_stages %}checked{% endif %}> Prescribing</label>
+                            <label><input type="checkbox" name="medication_system_stages" value="Order entry" {% if 'Order entry' in selected_stages %}checked{% endif %}> Order entry</label>
+                            <label><input type="checkbox" name="medication_system_stages" value="Verification" {% if 'Verification' in selected_stages %}checked{% endif %}> Verification</label>
+                            <label><input type="checkbox" name="medication_system_stages" value="Dispensing" {% if 'Dispensing' in selected_stages %}checked{% endif %}> Dispensing</label>
+                            <label><input type="checkbox" name="medication_system_stages" value="Administration" {% if 'Administration' in selected_stages %}checked{% endif %}> Administration</label>
+                            <label><input type="checkbox" name="medication_system_stages" value="Monitoring" {% if 'Monitoring' in selected_stages %}checked{% endif %}> Monitoring</label>
+                            <label><input type="checkbox" name="medication_system_stages" value="Documentation" {% if 'Documentation' in selected_stages %}checked{% endif %}> Documentation</label>
+                            <label><input type="checkbox" name="medication_system_stages" value="Transition of care" {% if 'Transition of care' in selected_stages %}checked{% endif %}> Transition of care</label>
                         </div>
                     </div>
 
@@ -150,21 +156,21 @@
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Route of Administration *</label>
                             <select name="route" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required>
-                                <option value="Oral">Oral</option>
-                                <option value="Topical">Topical</option>
-                                <option value="Injectable">Injectable</option>
-                                <option value="Inhalation">Inhalation</option>
-                                <option value="Ocular">Ocular</option>
-                                <option value="Other">Other</option>
+                                <option value="Oral" {% if incident.route == 'Oral' or not incident.route %}selected{% endif %}>Oral</option>
+                                <option value="Topical" {% if incident.route == 'Topical' %}selected{% endif %}>Topical</option>
+                                <option value="Injectable" {% if incident.route == 'Injectable' %}selected{% endif %}>Injectable</option>
+                                <option value="Inhalation" {% if incident.route == 'Inhalation' %}selected{% endif %}>Inhalation</option>
+                                <option value="Ocular" {% if incident.route == 'Ocular' %}selected{% endif %}>Ocular</option>
+                                <option value="Other" {% if incident.route == 'Other' %}selected{% endif %}>Other</option>
                             </select>
                         </div>
                         <div id="harm_container">
                             <label class="block text-sm font-medium text-slate-700 mb-1">Degree of Harm *</label>
                             <select name="harm_level" id="harm_level" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm">
-                                <option value="None">None</option>
-                                <option value="Mild">Mild</option>
-                                <option value="Moderate">Moderate</option>
-                                <option value="Severe">Severe</option>
+                                <option value="None" {% if incident.harm_level == 'None' or not incident.harm_level %}selected{% endif %}>None</option>
+                                <option value="Mild" {% if incident.harm_level == 'Mild' %}selected{% endif %}>Mild</option>
+                                <option value="Moderate" {% if incident.harm_level == 'Moderate' %}selected{% endif %}>Moderate</option>
+                                <option value="Severe" {% if incident.harm_level == 'Severe' %}selected{% endif %}>Severe</option>
                             </select>
                         </div>
                     </div>
@@ -172,33 +178,33 @@
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-2">Associated Factors *</label>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                            <label><input type="checkbox" name="associated_factors" value="Central Fill"> Central Fill</label>
-                            <label><input type="checkbox" name="associated_factors" value="Compliance Packaging"> Compliance Packaging</label>
-                            <label><input type="checkbox" name="associated_factors" value="Compounded medication"> Compounded medication</label>
-                            <label><input type="checkbox" name="associated_factors" value="Injection by pharmacy professional"> Injection by pharmacy professional</label>
-                            <label><input type="checkbox" name="associated_factors" value="Transition of care"> Transition of care</label>
-                            <label><input type="checkbox" name="associated_factors" value="None of the above"> None of the above</label>
+                            <label><input type="checkbox" name="associated_factors" value="Central Fill" {% if 'Central Fill' in selected_factors %}checked{% endif %}> Central Fill</label>
+                            <label><input type="checkbox" name="associated_factors" value="Compliance Packaging" {% if 'Compliance Packaging' in selected_factors %}checked{% endif %}> Compliance Packaging</label>
+                            <label><input type="checkbox" name="associated_factors" value="Compounded medication" {% if 'Compounded medication' in selected_factors %}checked{% endif %}> Compounded medication</label>
+                            <label><input type="checkbox" name="associated_factors" value="Injection by pharmacy professional" {% if 'Injection by pharmacy professional' in selected_factors %}checked{% endif %}> Injection by pharmacy professional</label>
+                            <label><input type="checkbox" name="associated_factors" value="Transition of care" {% if 'Transition of care' in selected_factors %}checked{% endif %}> Transition of care</label>
+                            <label><input type="checkbox" name="associated_factors" value="None of the above" {% if 'None of the above' in selected_factors %}checked{% endif %}> None of the above</label>
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Incident Description *</label>
-                        <textarea name="incident_description" rows="3" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required></textarea>
+                        <textarea name="incident_description" rows="3" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required>{{ incident.incident_description or '' }}</textarea>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Contributing Factors *</label>
-                        <textarea name="contributing_factors" rows="2" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required></textarea>
+                        <textarea name="contributing_factors" rows="2" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required>{{ incident.contributing_factors or '' }}</textarea>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Actions Taken at the Pharmacy Level *</label>
-                        <textarea name="actions_taken" rows="3" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required></textarea>
+                        <textarea name="actions_taken" rows="3" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm" required>{{ incident.actions_taken or '' }}</textarea>
                     </div>
 
                     <div class="flex justify-end space-x-4 pt-4 border-t">
                         <a href="/" class="px-5 py-2.5 border rounded-lg text-slate-700 text-sm">Cancel</a>
-                        <button type="submit" class="px-5 py-2.5 bg-red-700 hover:bg-red-900 text-white rounded-lg text-sm font-medium">Save Incident Record</button>
+                        <button type="submit" class="px-5 py-2.5 bg-green-700 hover:bg-green-900 text-white rounded-lg text-sm font-medium">{% if is_edit %}Update Incident Record{% else %}Save Incident Record{% endif %}</button>
                     </div>
                 </form>
             </div>
@@ -214,6 +220,9 @@
         }
     }
     </script>
+    {% if incident.event_type == 'Near Miss' %}
+    <script>toggleHarm();</script>
+    {% endif %}
 </body>
 </html>
 

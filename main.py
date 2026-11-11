@@ -15,12 +15,37 @@ app.secret_key = "aims_secure_portal_key"
 
 INCIDENTS_DIR = "incidents_store"
 NIDR_LOG_FILE = "nidr_sync_log.json"
+ACTION_PLANS_DIR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "action_plans"
+)
+ACTION_PLANS_FILE = os.path.join(
+    ACTION_PLANS_DIR, "action_plans.json"
+)
 CONFIG_FILE = "config.yaml"
 os.makedirs(INCIDENTS_DIR, exist_ok=True)
+os.makedirs(ACTION_PLANS_DIR, exist_ok=True)
 
-# In-memory storage for action plans and SSA submissions
-action_plans_db = []
+# SSA submissions remain in memory.
 ssa_results_db = []
+
+
+def load_action_plans():
+  """Loads saved CQI action plans from the JSON file."""
+  if not os.path.exists(ACTION_PLANS_FILE):
+    return []
+  with open(ACTION_PLANS_FILE, "r", encoding="utf-8") as f:
+    action_plans = json.load(f)
+  if not isinstance(action_plans, list) or any(
+      not isinstance(plan, dict) for plan in action_plans
+  ):
+    raise ValueError(f"{ACTION_PLANS_FILE} must contain a JSON array of objects")
+  return action_plans
+
+
+def save_action_plans(action_plans):
+  """Persists CQI action plans to the JSON file."""
+  with open(ACTION_PLANS_FILE, "w", encoding="utf-8") as f:
+    json.dump(action_plans, f, indent=4)
 
 
 def load_config():
@@ -105,23 +130,21 @@ def validate_incident_record(event_type, incident_data):
   return missing
 
 
+def get_default_user():
+  if AUTH_USERS:
+    username = next(iter(AUTH_USERS))
+    return AUTH_USERS[username]
+  return {
+      "full_name": "Local Pharmacist",
+      "practice_id": "PH-00000",
+  }
+
+
 def get_current_user():
-  username = session.get("username")
+  username = session.get("username") or next(iter(AUTH_USERS), None)
   if not username:
-    return None
-  return AUTH_USERS.get(username)
-
-
-@app.before_request
-def enforce_login():
-  allowed_paths = {"/login", "/logout"}
-  if request.path.startswith("/static"):
-    return None
-  if request.path in allowed_paths:
-    return None
-  if not session.get("authenticated"):
-    return redirect(url_for("login"))
-  return None
+    return get_default_user()
+  return AUTH_USERS.get(username, get_default_user())
 
 
 def get_nidr_access_token():
@@ -286,6 +309,33 @@ def save_incident_to_file(incident_data):
     json.dump(incident_data, f, indent=4)
 
 
+def get_incident_filepath(incident_id):
+  if not incident_id.isalnum():
+    return None
+  return os.path.join(INCIDENTS_DIR, f"incident_{incident_id}.json")
+
+
+def load_incident_from_file(incident_id):
+  filepath = get_incident_filepath(incident_id)
+  if not filepath or not os.path.exists(filepath):
+    return None
+  with open(filepath, "r") as f:
+    incident = json.load(f)
+  if not isinstance(incident, dict) or incident.get("id") != incident_id:
+    return None
+  return incident
+
+
+def update_incident_in_file(incident_id, incident_data):
+  filepath = get_incident_filepath(incident_id)
+  incident = load_incident_from_file(incident_id)
+  if not filepath or incident is None:
+    raise FileNotFoundError(f"Incident {incident_id} could not be found.")
+  incident.update(incident_data)
+  with open(filepath, "w") as f:
+    json.dump(incident, f, indent=4)
+
+
 def get_seconds_until_0300():
   now = datetime.now()
   target = now.replace(hour=3, minute=0, second=0, microsecond=0)
@@ -308,28 +358,6 @@ def schedule_daily_nidr_sync():
   return timer
 
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
-  if request.method == "POST":
-    username = request.form.get("username", "").strip()
-    password = request.form.get("password", "")
-    user = AUTH_USERS.get(username)
-    if user and user.get("password") == password:
-      session["authenticated"] = True
-      session["username"] = username
-      flash("Signed in successfully.", "success")
-      return redirect(url_for("index"))
-    flash("Invalid username or password.", "error")
-  return render_template("login.html")
-
-
-@app.route("/logout")
-def logout():
-  session.clear()
-  flash("You have been signed out.", "success")
-  return redirect(url_for("login"))
-
-
 @app.route("/")
 def index():
   current_user = get_current_user()
@@ -337,41 +365,69 @@ def index():
       "index.html",
       incidents=get_all_incidents(),
       incidents_dir=INCIDENTS_DIR,
-      action_plans_db=action_plans_db,
+      action_plans_db=load_action_plans(),
       ssa_results_db=ssa_results_db,
       current_user=current_user,
+  )
+
+
+def build_incident_from_form():
+  event_type = request.form.get("event_type")
+  return {
+      "event_type": event_type,
+      "date": request.form.get("date"),
+      "time": request.form.get("time"),
+      "age_range": request.form.get("age_range"),
+      "patient_gender": request.form.get("patient_gender"),
+      "incident_type": request.form.get("incident_type"),
+      "discovered_by": request.form.get("discovered_by"),
+      "prescribed_by": request.form.get("prescribed_by"),
+      "medication_system_stages": ", ".join(
+          request.form.getlist("medication_system_stages")
+      ) or "None",
+      "medications_involved": request.form.get("medications_involved"),
+      "route": request.form.get("route"),
+      "associated_factors": ", ".join(
+          request.form.getlist("associated_factors")
+      ) or "None",
+      "harm_level": (
+          request.form.get("harm_level") if event_type == "Incident" else "N/A"
+      ),
+      "incident_description": request.form.get("incident_description"),
+      "contributing_factors": request.form.get("contributing_factors"),
+      "actions_taken": request.form.get("actions_taken"),
+      "recorded_by": session.get("username"),
+  }
+
+
+def render_incident_form(incident=None, is_edit=False):
+  incident = incident or {}
+  selected_stages = [
+      value.strip()
+      for value in (incident.get("medication_system_stages") or "").split(",")
+      if value.strip() and value.strip() != "None"
+  ]
+  selected_factors = [
+      value.strip()
+      for value in (incident.get("associated_factors") or "").split(",")
+      if value.strip() and value.strip() != "None"
+  ]
+  return render_template(
+      "report.html",
+      today=datetime.now().strftime("%Y-%m-%d"),
+      current_user=get_current_user(),
+      incident=incident,
+      is_edit=is_edit,
+      selected_stages=selected_stages,
+      selected_factors=selected_factors,
   )
 
 
 @app.route("/report", methods=["GET", "POST"])
 def report():
   if request.method == "POST":
-    event_type = request.form.get("event_type")
-    incident_data = {
-        "event_type": event_type,
-        "date": request.form.get("date"),
-        "time": request.form.get("time"),
-        "age_range": request.form.get("age_range"),
-        "patient_gender": request.form.get("patient_gender"),
-        "incident_type": request.form.get("incident_type"),
-        "discovered_by": request.form.get("discovered_by"),
-        "prescribed_by": request.form.get("prescribed_by"),
-        "medication_system_stages": ", ".join(
-            request.form.getlist("medication_system_stages")
-        ) or "None",
-        "medications_involved": request.form.get("medications_involved"),
-        "route": request.form.get("route"),
-        "associated_factors": ", ".join(
-            request.form.getlist("associated_factors")
-        ) or "None",
-        "harm_level": (
-            request.form.get("harm_level") if event_type == "Incident" else "N/A"
-        ),
-        "incident_description": request.form.get("incident_description"),
-        "contributing_factors": request.form.get("contributing_factors"),
-        "actions_taken": request.form.get("actions_taken"),
-        "recorded_by": session.get("username"),
-    }
+    incident_data = build_incident_from_form()
+    event_type = incident_data["event_type"]
     missing_fields = validate_incident_record(event_type, incident_data)
     if missing_fields:
       flash(
@@ -379,11 +435,7 @@ def report():
           + ", ".join(sorted(missing_fields)),
           "error",
       )
-      return render_template(
-          "report.html",
-          today=datetime.now().strftime("%Y-%m-%d"),
-          current_user=get_current_user(),
-      )
+      return render_incident_form(incident_data)
     save_incident_to_file(incident_data)
     flash(
         "Incident saved as a standalone JSON file and queued for NIDR"
@@ -391,27 +443,89 @@ def report():
         "success",
     )
     return redirect(url_for("index"))
-  return render_template(
-      "report.html",
-      today=datetime.now().strftime("%Y-%m-%d"),
-      current_user=get_current_user(),
-  )
+  return render_incident_form()
+
+
+@app.route("/incidents/<incident_id>/edit", methods=["GET", "POST"])
+def edit_incident(incident_id):
+  incident = load_incident_from_file(incident_id)
+  if incident is None:
+    flash("The requested incident could not be found.", "error")
+    return redirect(url_for("index"))
+
+  if request.method == "POST":
+    incident_data = build_incident_from_form()
+    missing_fields = validate_incident_record(
+        incident_data["event_type"], incident_data
+    )
+    if missing_fields:
+      flash(
+          "Please complete all required AIMS fields before saving: "
+          + ", ".join(sorted(missing_fields)),
+          "error",
+      )
+      return render_incident_form(incident_data, is_edit=True)
+    incident_data.pop("recorded_by")
+    update_incident_in_file(incident_id, incident_data)
+    flash("Incident record updated.", "success")
+    return redirect(url_for("index"))
+
+  return render_incident_form(incident, is_edit=True)
+
+
+@app.route("/incidents/<incident_id>/print")
+def print_incident(incident_id):
+  incident = load_incident_from_file(incident_id)
+  if incident is None:
+    flash("The requested incident could not be found.", "error")
+    return redirect(url_for("index"))
+  return render_template("incident_print.html", incident=incident)
 
 
 @app.route("/action-plans", methods=["GET", "POST"])
 def action_plans():
   if request.method == "POST":
-    action_plans_db.append({
+    plans = load_action_plans()
+    plans.append({
         "issue": request.form.get("issue"),
         "target_date": request.form.get("target_date"),
         "steps": request.form.get("steps"),
     })
+    save_action_plans(plans)
     flash("CQI Action Plan recorded.", "success")
     return redirect(url_for("action_plans"))
   return render_template(
       "action_plans.html",
-      action_plans_db=action_plans_db,
+      action_plans_db=load_action_plans(),
       current_user=get_current_user(),
+      edit_plan=None,
+      edit_index=None,
+  )
+
+
+@app.route("/action-plans/<int:plan_index>/edit", methods=["GET", "POST"])
+def edit_action_plan(plan_index):
+  plans = load_action_plans()
+  if plan_index < 0 or plan_index >= len(plans):
+    flash("The requested action plan could not be found.", "error")
+    return redirect(url_for("action_plans"))
+
+  if request.method == "POST":
+    plans[plan_index] = {
+        "issue": request.form.get("issue"),
+        "target_date": request.form.get("target_date"),
+        "steps": request.form.get("steps"),
+    }
+    save_action_plans(plans)
+    flash("CQI Action Plan updated.", "success")
+    return redirect(url_for("action_plans"))
+
+  return render_template(
+      "action_plans.html",
+      action_plans_db=plans,
+      current_user=get_current_user(),
+      edit_plan=plans[plan_index],
+      edit_index=plan_index,
   )
 
 
